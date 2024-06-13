@@ -28,6 +28,9 @@ func NewRedis(addr string) *Redis {
 }
 
 func (r *Redis) IncreaseScore(ctx context.Context, key string, timeframe time.Duration) error {
+	r.Lock()
+	defer r.Unlock()
+
 	now := time.Now().Unix()
 
 	r.client.ZAdd(ctx, key, &redis.Z{

@@ -62,12 +62,12 @@ func Wrap(ratelimiter *RateLimiter, next http.Handler) http.Handler {
 			// apply rate limit logic
 			err := ratelimiter.execute(w, r)
 			if err != nil {
+				w.Header().Add("Content-Type", "application/json")
 				json.NewEncoder(w).Encode(struct {
 					Error string `json:"error"`
 				}{
 					Error: err.Error(),
 				})
-				w.Header().Add("Content-Type", "application/json")
 				return
 			}
 

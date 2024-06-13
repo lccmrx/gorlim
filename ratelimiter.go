@@ -59,10 +59,11 @@ func WithRequestLimit(maxRequestsPerTime int) optionFunc {
 func Wrap(ratelimiter *RateLimiter, next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+
 			// apply rate limit logic
 			err := ratelimiter.execute(w, r)
 			if err != nil {
-				w.Header().Add("Content-Type", "application/json")
 				json.NewEncoder(w).Encode(struct {
 					Error string `json:"error"`
 				}{

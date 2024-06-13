@@ -3,7 +3,6 @@ package backend
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -14,7 +13,6 @@ import (
 var _ gorlim.Backend = (*Redis)(nil)
 
 type Redis struct {
-	sync.Mutex
 	client *redis.Client
 }
 
@@ -23,14 +21,10 @@ func NewRedis(addr string) *Redis {
 		client: redis.NewClient(&redis.Options{
 			Addr: addr,
 		}),
-		Mutex: sync.Mutex{},
 	}
 }
 
 func (r *Redis) IncreaseScore(ctx context.Context, key string, timeframe time.Duration) error {
-	r.Lock()
-	defer r.Unlock()
-
 	now := time.Now().Unix()
 
 	r.client.ZAdd(ctx, key, &redis.Z{
@@ -45,9 +39,6 @@ func (r *Redis) IncreaseScore(ctx context.Context, key string, timeframe time.Du
 }
 
 func (r *Redis) GetScore(ctx context.Context, key string, timeframe time.Duration) (int, error) {
-	r.Lock()
-	defer r.Unlock()
-
 	now := time.Now()
 	min := fmt.Sprintf("%d", now.Add(-timeframe).Unix())
 	max := fmt.Sprintf("%d", now.Unix())

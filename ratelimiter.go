@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/im7mortal/kmutex"
 )
 
 const (
@@ -23,12 +25,15 @@ type RateLimiter struct {
 
 	enabledHeaderLimiter bool
 	headerMap            map[string]int
+
+	*kmutex.Kmutex
 }
 
 type optionFunc func(*RateLimiter)
 
 func New(backend Backend, opts ...optionFunc) *RateLimiter {
 	ratelimiter := new(RateLimiter)
+	ratelimiter.Kmutex = kmutex.New()
 	ratelimiter.backend = backend
 
 	ratelimiter.headerMap = make(map[string]int)
@@ -114,6 +119,9 @@ func (ratelimiter *RateLimiter) execute(w http.ResponseWriter, r *http.Request) 
 			}
 		}
 	}
+
+	ratelimiter.Lock(limiterKey)
+	defer ratelimiter.Unlock(limiterKey)
 
 	limiterScore, err := ratelimiter.backend.GetScore(ctx, limiterKey, limiterDuration)
 	if err != nil {

@@ -5,6 +5,7 @@ go 1.22.2
 require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/google/uuid v1.6.0
+	github.com/im7mortal/kmutex v1.0.1
 )
 
 require (

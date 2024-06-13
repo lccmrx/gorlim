@@ -67,6 +67,7 @@ func Wrap(ratelimiter *RateLimiter, next http.Handler) http.Handler {
 				}{
 					Error: err.Error(),
 				})
+				w.Header().Add("Content-Type", "application/json")
 				return
 			}
 

@@ -86,7 +86,6 @@ func (ratelimiter *RateLimiter) setFromEnv() {
 	if timeframe != "" {
 		if timeframe, ok := timeframeString[timeframe]; ok {
 			ratelimiter.timeframe = timeframe
-
 		}
 	}
 
@@ -107,8 +106,8 @@ func (ratelimiter *RateLimiter) execute(w http.ResponseWriter, r *http.Request) 
 
 	if ratelimiter.enabledHeaderLimiter {
 		for header, maxRequestsPerTime := range ratelimiter.headerMap {
-			if header := r.Header.Get(header); header != "" {
-				limiterKey = header
+			if headerValue := r.Header.Get(header); headerValue != "" {
+				limiterKey = fmt.Sprintf("%s:%s", header, headerValue)
 				limiterMaxRequests = maxRequestsPerTime
 			}
 		}
